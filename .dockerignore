@@ -1,0 +1,7 @@
+.git
+.env
+*.yaml
+*.pdf
+Dockerfile
+LICENSE
+README.md
