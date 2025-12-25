@@ -6,12 +6,9 @@ include:
 services:
 
   web:
-    # Вариант 1: сборка из Dockerfile.python
     build:
       context: .
       dockerfile: Dockerfile.python
-    # Вариант 2: использование образа из Yandex Cloud Container Registry (закомментировать build при использовании)
-    # image: cr.yandex/<ваш-репозиторий>/<имя-образа>:<тег>
     
     restart: always
     environment:
@@ -20,7 +17,8 @@ services:
       - DB_USER=${MYSQL_USER}
       - DB_PASSWORD=${MYSQL_PASSWORD}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     expose:
       - 5000
     networks:
@@ -30,7 +28,6 @@ services:
   db:
     image: mysql:8
     restart: always
-    command: --pid-file=/var/lib/mysql/mysqld.pid
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -40,7 +37,10 @@ services:
       - db_data:/var/lib/mysql
     expose:
       - 3306
-    # Порт 3306 не публикуется на хост (доступ только внутри сети Compose)
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
     networks:
       backend:
         ipv4_address: 172.20.0.10
