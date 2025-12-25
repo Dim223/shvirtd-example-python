@@ -1,0 +1,56 @@
+version: '3.8'
+
+include:
+  - proxy.yaml
+
+services:
+
+  web:
+    # Вариант 1: сборка из Dockerfile.python
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    # Вариант 2: использование образа из Yandex Cloud Container Registry (закомментировать build при использовании)
+    # image: cr.yandex/<ваш-репозиторий>/<имя-образа>:<тег>
+    
+    restart: always
+    environment:
+      - DB_HOST=db
+      - DB_NAME=${MYSQL_DATABASE}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+    depends_on:
+      - db
+    expose:
+      - 5000
+    networks:
+      backend:
+        ipv4_address: 172.20.0.5
+
+  db:
+    image: mysql:8
+    restart: always
+    command: --pid-file=/var/lib/mysql/mysqld.pid
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    expose:
+      - 3306
+    # Порт 3306 не публикуется на хост (доступ только внутри сети Compose)
+    networks:
+      backend:
+        ipv4_address: 172.20.0.10
+
+networks:
+  backend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+volumes:
+  db_data:
