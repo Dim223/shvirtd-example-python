@@ -1,2 +1,10 @@
-!main.py
-!requirements.txt
+.git
+.env
+*.yaml
+*.pdf
+Dockerfile
+LICENSE
+README.md
+haproxy/
+nginx/
+Dockerfile.python
