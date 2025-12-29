@@ -37,7 +37,7 @@ services:
     command: ["mysqld", "--mysql-native-password=ON"]
     volumes:
       - db_data:/var/lib/mysql
-      - /opt/backup:/backup:rw #!!!!!!!!!!
+      - /opt/backup:/backup:rw 
     expose:
       - 3306
     healthcheck:
